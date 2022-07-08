@@ -13,6 +13,18 @@ inputs:
     description: 'The environment to use for the action'
     required: false
     default: 'PRE-PROD'
+  jira-url:
+    description: 'The Jira URL'
+    required: true
+    default: ''
+  jira-username:
+    description: 'The Jira username for the basic auth'
+    required: true
+    default: ''
+  jira-password:
+    description: 'The Jira basic auth password'
+    required: true
+    default: ''
 runs:
   using: 'node16'
   main: 'dist/index.js'
