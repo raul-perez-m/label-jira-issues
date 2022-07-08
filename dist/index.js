@@ -14,7 +14,7 @@ module.exports.LabelJiraIssues = class LabelJiraIssues {
         this.owner = sOwner;
         this.repo = sRepo;
         const version = sVersion.match(/v\d*/gi);
-        this.tag = version[0];
+        this.version = version[0];
         this.jiraConfig = jiraConfig;
         this.octokit = new Octokit({
             auth: sAuthToken,
@@ -24,8 +24,11 @@ module.exports.LabelJiraIssues = class LabelJiraIssues {
 
     async labelJiraIssues() {
         const release = await this.getReleaseInfos(this.owner, this.repo);
-
-        await this.updateIssues(release);
+        if (!release) {
+            core.setFailed("no release found");
+        } else {
+            await this.updateIssues(release);
+        }
     }
 
     async getReleaseInfos(sOwner, sRepo) {
@@ -58,7 +61,6 @@ module.exports.LabelJiraIssues = class LabelJiraIssues {
             }
         }
     }
-
 }
 
 /***/ }),
