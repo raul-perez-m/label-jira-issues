@@ -1,10 +1,6 @@
 name: 'Jira label issues from Release notes.'
 description: 'A little github action to label issues getting the issues from the release text'
 inputs:
-  version:
-    description: 'From which version should we get the release text?'
-    required: true
-    default: ''
   github-access-token:
     description: 'The GitHub access token required to delete the assets & discover non released versions'
     required: true
