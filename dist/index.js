@@ -9900,7 +9900,7 @@ const {LabelJiraIssues} = __nccwpck_require__(1765);
 
 const sRepo = github.context.repo.repo;
 const sOwner = github.context.repo.owner
-const sVersion = github.ref;
+const sVersion = core.getInput("version")
 const sAuthToken = core.getInput("github-access-token");
 const environment = core.getInput("environment");
 
@@ -9910,7 +9910,7 @@ if (!sVersion) { core.error("no version specified, aborting"); }
 if (!sAuthToken) { core.error("no GitHub access token specified, aborting"); }
 
 const run = async function () {
-    new LabelJiraIssues(sAuthToken, sOwner, sRepo, sVersion, environment).createReleaseNotes(sFilePath);
+    new LabelJiraIssues(sAuthToken, sOwner, sRepo, sVersion, environment).labelJiraIssues();
 }
 
 try {
