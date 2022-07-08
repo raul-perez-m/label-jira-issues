@@ -17,7 +17,7 @@ inputs:
     description: 'The Jira URL'
     required: true
     default: ''
-  jira-username:
+  jira-user:
     description: 'The Jira username for the basic auth'
     required: true
     default: ''
