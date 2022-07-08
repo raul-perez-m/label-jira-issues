@@ -1,5 +1,5 @@
 const core = require('@actions/core');
-const github = requiere('@actions/github');
+const github = require('@actions/github');
 const {LabelJiraIssues} = require("./label-jira-issues");
 
 const sRepo = github.context.repo.repo;

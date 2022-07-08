@@ -1033,6 +1033,221 @@ exports.toCommandProperties = toCommandProperties;
 
 /***/ }),
 
+/***/ 8702:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Context = void 0;
+const fs_1 = __nccwpck_require__(7147);
+const os_1 = __nccwpck_require__(2037);
+class Context {
+    /**
+     * Hydrate the context from the environment
+     */
+    constructor() {
+        var _a, _b, _c;
+        this.payload = {};
+        if (process.env.GITHUB_EVENT_PATH) {
+            if (fs_1.existsSync(process.env.GITHUB_EVENT_PATH)) {
+                this.payload = JSON.parse(fs_1.readFileSync(process.env.GITHUB_EVENT_PATH, { encoding: 'utf8' }));
+            }
+            else {
+                const path = process.env.GITHUB_EVENT_PATH;
+                process.stdout.write(`GITHUB_EVENT_PATH ${path} does not exist${os_1.EOL}`);
+            }
+        }
+        this.eventName = process.env.GITHUB_EVENT_NAME;
+        this.sha = process.env.GITHUB_SHA;
+        this.ref = process.env.GITHUB_REF;
+        this.workflow = process.env.GITHUB_WORKFLOW;
+        this.action = process.env.GITHUB_ACTION;
+        this.actor = process.env.GITHUB_ACTOR;
+        this.job = process.env.GITHUB_JOB;
+        this.runNumber = parseInt(process.env.GITHUB_RUN_NUMBER, 10);
+        this.runId = parseInt(process.env.GITHUB_RUN_ID, 10);
+        this.apiUrl = (_a = process.env.GITHUB_API_URL) !== null && _a !== void 0 ? _a : `https://api.github.com`;
+        this.serverUrl = (_b = process.env.GITHUB_SERVER_URL) !== null && _b !== void 0 ? _b : `https://github.com`;
+        this.graphqlUrl = (_c = process.env.GITHUB_GRAPHQL_URL) !== null && _c !== void 0 ? _c : `https://api.github.com/graphql`;
+    }
+    get issue() {
+        const payload = this.payload;
+        return Object.assign(Object.assign({}, this.repo), { number: (payload.issue || payload.pull_request || payload).number });
+    }
+    get repo() {
+        if (process.env.GITHUB_REPOSITORY) {
+            const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
+            return { owner, repo };
+        }
+        if (this.payload.repository) {
+            return {
+                owner: this.payload.repository.owner.login,
+                repo: this.payload.repository.name
+            };
+        }
+        throw new Error("context.repo requires a GITHUB_REPOSITORY environment variable like 'owner/repo'");
+    }
+}
+exports.Context = Context;
+//# sourceMappingURL=context.js.map
+
+/***/ }),
+
+/***/ 780:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getOctokit = exports.context = void 0;
+const Context = __importStar(__nccwpck_require__(8702));
+const utils_1 = __nccwpck_require__(580);
+exports.context = new Context.Context();
+/**
+ * Returns a hydrated octokit ready to use for GitHub Actions
+ *
+ * @param     token    the repo PAT or GITHUB_TOKEN
+ * @param     options  other options to set
+ */
+function getOctokit(token, options) {
+    return new utils_1.GitHub(utils_1.getOctokitOptions(token, options));
+}
+exports.getOctokit = getOctokit;
+//# sourceMappingURL=github.js.map
+
+/***/ }),
+
+/***/ 1663:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getApiBaseUrl = exports.getProxyAgent = exports.getAuthString = void 0;
+const httpClient = __importStar(__nccwpck_require__(4799));
+function getAuthString(token, options) {
+    if (!token && !options.auth) {
+        throw new Error('Parameter token or opts.auth is required');
+    }
+    else if (token && options.auth) {
+        throw new Error('Parameters token and opts.auth may not both be specified');
+    }
+    return typeof options.auth === 'string' ? options.auth : `token ${token}`;
+}
+exports.getAuthString = getAuthString;
+function getProxyAgent(destinationUrl) {
+    const hc = new httpClient.HttpClient();
+    return hc.getAgent(destinationUrl);
+}
+exports.getProxyAgent = getProxyAgent;
+function getApiBaseUrl() {
+    return process.env['GITHUB_API_URL'] || 'https://api.github.com';
+}
+exports.getApiBaseUrl = getApiBaseUrl;
+//# sourceMappingURL=utils.js.map
+
+/***/ }),
+
+/***/ 580:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getOctokitOptions = exports.GitHub = exports.context = void 0;
+const Context = __importStar(__nccwpck_require__(8702));
+const Utils = __importStar(__nccwpck_require__(1663));
+// octokit + plugins
+const core_1 = __nccwpck_require__(2911);
+const plugin_rest_endpoint_methods_1 = __nccwpck_require__(176);
+const plugin_paginate_rest_1 = __nccwpck_require__(3994);
+exports.context = new Context.Context();
+const baseUrl = Utils.getApiBaseUrl();
+const defaults = {
+    baseUrl,
+    request: {
+        agent: Utils.getProxyAgent(baseUrl)
+    }
+};
+exports.GitHub = core_1.Octokit.plugin(plugin_rest_endpoint_methods_1.restEndpointMethods, plugin_paginate_rest_1.paginateRest).defaults(defaults);
+/**
+ * Convience function to correctly format Octokit Options to pass into the constructor.
+ *
+ * @param     token    the repo PAT or GITHUB_TOKEN
+ * @param     options  other options to set
+ */
+function getOctokitOptions(token, options) {
+    const opts = Object.assign({}, options || {}); // Shallow clone - don't mutate the object provided by the caller
+    // Auth
+    const auth = Utils.getAuthString(token, opts);
+    if (auth) {
+        opts.auth = auth;
+    }
+    return opts;
+}
+exports.getOctokitOptions = getOctokitOptions;
+//# sourceMappingURL=utils.js.map
+
+/***/ }),
+
 /***/ 4170:
 /***/ (function(__unused_webpack_module, exports) {
 
@@ -1798,6 +2013,253 @@ function checkBypass(reqUrl) {
 }
 exports.checkBypass = checkBypass;
 //# sourceMappingURL=proxy.js.map
+
+/***/ }),
+
+/***/ 7534:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+
+const REGEX_IS_INSTALLATION_LEGACY = /^v1\./;
+const REGEX_IS_INSTALLATION = /^ghs_/;
+const REGEX_IS_USER_TO_SERVER = /^ghu_/;
+async function auth(token) {
+  const isApp = token.split(/\./).length === 3;
+  const isInstallation = REGEX_IS_INSTALLATION_LEGACY.test(token) || REGEX_IS_INSTALLATION.test(token);
+  const isUserToServer = REGEX_IS_USER_TO_SERVER.test(token);
+  const tokenType = isApp ? "app" : isInstallation ? "installation" : isUserToServer ? "user-to-server" : "oauth";
+  return {
+    type: "token",
+    token: token,
+    tokenType
+  };
+}
+
+/**
+ * Prefix token for usage in the Authorization header
+ *
+ * @param token OAuth token or JSON Web Token
+ */
+function withAuthorizationPrefix(token) {
+  if (token.split(/\./).length === 3) {
+    return `bearer ${token}`;
+  }
+
+  return `token ${token}`;
+}
+
+async function hook(token, request, route, parameters) {
+  const endpoint = request.endpoint.merge(route, parameters);
+  endpoint.headers.authorization = withAuthorizationPrefix(token);
+  return request(endpoint);
+}
+
+const createTokenAuth = function createTokenAuth(token) {
+  if (!token) {
+    throw new Error("[@octokit/auth-token] No token passed to createTokenAuth");
+  }
+
+  if (typeof token !== "string") {
+    throw new Error("[@octokit/auth-token] Token passed to createTokenAuth is not a string");
+  }
+
+  token = token.replace(/^(token|bearer) +/i, "");
+  return Object.assign(auth.bind(null, token), {
+    hook: hook.bind(null, token)
+  });
+};
+
+exports.createTokenAuth = createTokenAuth;
+//# sourceMappingURL=index.js.map
+
+
+/***/ }),
+
+/***/ 2911:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+
+var universalUserAgent = __nccwpck_require__(5807);
+var beforeAfterHook = __nccwpck_require__(1570);
+var request = __nccwpck_require__(337);
+var graphql = __nccwpck_require__(3858);
+var authToken = __nccwpck_require__(7534);
+
+function _objectWithoutPropertiesLoose(source, excluded) {
+  if (source == null) return {};
+  var target = {};
+  var sourceKeys = Object.keys(source);
+  var key, i;
+
+  for (i = 0; i < sourceKeys.length; i++) {
+    key = sourceKeys[i];
+    if (excluded.indexOf(key) >= 0) continue;
+    target[key] = source[key];
+  }
+
+  return target;
+}
+
+function _objectWithoutProperties(source, excluded) {
+  if (source == null) return {};
+
+  var target = _objectWithoutPropertiesLoose(source, excluded);
+
+  var key, i;
+
+  if (Object.getOwnPropertySymbols) {
+    var sourceSymbolKeys = Object.getOwnPropertySymbols(source);
+
+    for (i = 0; i < sourceSymbolKeys.length; i++) {
+      key = sourceSymbolKeys[i];
+      if (excluded.indexOf(key) >= 0) continue;
+      if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue;
+      target[key] = source[key];
+    }
+  }
+
+  return target;
+}
+
+const VERSION = "3.6.0";
+
+const _excluded = ["authStrategy"];
+class Octokit {
+  constructor(options = {}) {
+    const hook = new beforeAfterHook.Collection();
+    const requestDefaults = {
+      baseUrl: request.request.endpoint.DEFAULTS.baseUrl,
+      headers: {},
+      request: Object.assign({}, options.request, {
+        // @ts-ignore internal usage only, no need to type
+        hook: hook.bind(null, "request")
+      }),
+      mediaType: {
+        previews: [],
+        format: ""
+      }
+    }; // prepend default user agent with `options.userAgent` if set
+
+    requestDefaults.headers["user-agent"] = [options.userAgent, `octokit-core.js/${VERSION} ${universalUserAgent.getUserAgent()}`].filter(Boolean).join(" ");
+
+    if (options.baseUrl) {
+      requestDefaults.baseUrl = options.baseUrl;
+    }
+
+    if (options.previews) {
+      requestDefaults.mediaType.previews = options.previews;
+    }
+
+    if (options.timeZone) {
+      requestDefaults.headers["time-zone"] = options.timeZone;
+    }
+
+    this.request = request.request.defaults(requestDefaults);
+    this.graphql = graphql.withCustomRequest(this.request).defaults(requestDefaults);
+    this.log = Object.assign({
+      debug: () => {},
+      info: () => {},
+      warn: console.warn.bind(console),
+      error: console.error.bind(console)
+    }, options.log);
+    this.hook = hook; // (1) If neither `options.authStrategy` nor `options.auth` are set, the `octokit` instance
+    //     is unauthenticated. The `this.auth()` method is a no-op and no request hook is registered.
+    // (2) If only `options.auth` is set, use the default token authentication strategy.
+    // (3) If `options.authStrategy` is set then use it and pass in `options.auth`. Always pass own request as many strategies accept a custom request instance.
+    // TODO: type `options.auth` based on `options.authStrategy`.
+
+    if (!options.authStrategy) {
+      if (!options.auth) {
+        // (1)
+        this.auth = async () => ({
+          type: "unauthenticated"
+        });
+      } else {
+        // (2)
+        const auth = authToken.createTokenAuth(options.auth); // @ts-ignore  ¯\_(ツ)_/¯
+
+        hook.wrap("request", auth.hook);
+        this.auth = auth;
+      }
+    } else {
+      const {
+        authStrategy
+      } = options,
+            otherOptions = _objectWithoutProperties(options, _excluded);
+
+      const auth = authStrategy(Object.assign({
+        request: this.request,
+        log: this.log,
+        // we pass the current octokit instance as well as its constructor options
+        // to allow for authentication strategies that return a new octokit instance
+        // that shares the same internal state as the current one. The original
+        // requirement for this was the "event-octokit" authentication strategy
+        // of https://github.com/probot/octokit-auth-probot.
+        octokit: this,
+        octokitOptions: otherOptions
+      }, options.auth)); // @ts-ignore  ¯\_(ツ)_/¯
+
+      hook.wrap("request", auth.hook);
+      this.auth = auth;
+    } // apply plugins
+    // https://stackoverflow.com/a/16345172
+
+
+    const classConstructor = this.constructor;
+    classConstructor.plugins.forEach(plugin => {
+      Object.assign(this, plugin(this, options));
+    });
+  }
+
+  static defaults(defaults) {
+    const OctokitWithDefaults = class extends this {
+      constructor(...args) {
+        const options = args[0] || {};
+
+        if (typeof defaults === "function") {
+          super(defaults(options));
+          return;
+        }
+
+        super(Object.assign({}, defaults, options, options.userAgent && defaults.userAgent ? {
+          userAgent: `${options.userAgent} ${defaults.userAgent}`
+        } : null));
+      }
+
+    };
+    return OctokitWithDefaults;
+  }
+  /**
+   * Attach a plugin (or many) to your Octokit instance.
+   *
+   * @example
+   * const API = Octokit.plugin(plugin1, plugin2, plugin3, ...)
+   */
+
+
+  static plugin(...newPlugins) {
+    var _a;
+
+    const currentPlugins = this.plugins;
+    const NewOctokit = (_a = class extends this {}, _a.plugins = currentPlugins.concat(newPlugins.filter(plugin => !currentPlugins.includes(plugin))), _a);
+    return NewOctokit;
+  }
+
+}
+Octokit.VERSION = VERSION;
+Octokit.plugins = [];
+
+exports.Octokit = Octokit;
+//# sourceMappingURL=index.js.map
+
 
 /***/ }),
 
@@ -14408,7 +14870,7 @@ var __webpack_exports__ = {};
 // This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
 (() => {
 const core = __nccwpck_require__(9901);
-const github = requiere('@actions/github');
+const github = __nccwpck_require__(780);
 const {LabelJiraIssues} = __nccwpck_require__(1765);
 
 const sRepo = github.context.repo.repo;
