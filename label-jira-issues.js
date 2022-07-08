@@ -4,16 +4,16 @@ const axios = require("axios");
 
 module.exports.LabelJiraIssues = class LabelJiraIssues {
 
-    constructor(sAuthToken, sOwner, sRepo, sVersion, environment, jiraConfig) {
+    constructor(sAuthToken, sOwner, sRepo, sVersion, tag, jiraConfig) {
         this.owner = sOwner;
         this.repo = sRepo;
         const version = sVersion.match(/v\d*/gi);
-        this.version = version[0];
+        this.tag = version[0];
         this.jiraConfig = jiraConfig;
         this.octokit = new Octokit({
             auth: sAuthToken,
         });
-        this.environment = environment;
+        this.tag = tag;
     }
 
     async labelJiraIssues() {
@@ -41,14 +41,14 @@ module.exports.LabelJiraIssues = class LabelJiraIssues {
                     username: this.jiraConfig.jiraUser,
                     password: this.jiraConfig.jiraPassword,
                 },
-                data: { fields: { labels: [this.environment] } }
+                data: { fields: { labels: [this.tag] } }
             };
             try {
                 await axios(request);
-                console.log(`${issueNumber} updated with TAG: ${this.environment}`);
+                console.log(`${issueNumber} updated with TAG: ${this.tag}`);
             } catch (error) {
                 console.log(error);
-                core.error(`${issueNumber} not updated with TAG: ${this.environment}`);
+                core.error(`${issueNumber} not updated with TAG: ${this.tag}`);
             }
         }
     }

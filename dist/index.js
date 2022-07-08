@@ -10,16 +10,16 @@ const axios = __nccwpck_require__(1972);
 
 module.exports.LabelJiraIssues = class LabelJiraIssues {
 
-    constructor(sAuthToken, sOwner, sRepo, sVersion, environment, jiraConfig) {
+    constructor(sAuthToken, sOwner, sRepo, sVersion, tag, jiraConfig) {
         this.owner = sOwner;
         this.repo = sRepo;
         const version = sVersion.match(/v\d*/gi);
-        this.version = version[0];
+        this.tag = version[0];
         this.jiraConfig = jiraConfig;
         this.octokit = new Octokit({
             auth: sAuthToken,
         });
-        this.environment = environment;
+        this.tag = tag;
     }
 
     async labelJiraIssues() {
@@ -47,14 +47,14 @@ module.exports.LabelJiraIssues = class LabelJiraIssues {
                     username: this.jiraConfig.jiraUser,
                     password: this.jiraConfig.jiraPassword,
                 },
-                data: { fields: { labels: [this.environment] } }
+                data: { fields: { labels: [this.tag] } }
             };
             try {
                 await axios(request);
-                console.log(`${issueNumber} updated with TAG: ${this.environment}`);
+                console.log(`${issueNumber} updated with TAG: ${this.tag}`);
             } catch (error) {
                 console.log(error);
-                core.error(`${issueNumber} not updated with TAG: ${this.environment}`);
+                core.error(`${issueNumber} not updated with TAG: ${this.tag}`);
             }
         }
     }
@@ -14876,8 +14876,8 @@ const {LabelJiraIssues} = __nccwpck_require__(1765);
 const sRepo = github.context.repo.repo;
 const sOwner = github.context.repo.owner
 const sVersion = core.getInput("version")
-const sAuthToken = core.getInput("github-access-token");  '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'
-const environment = core.getInput("environment");
+const sAuthToken = core.getInput("github-access-token");
+const tag = core.getInput("tag");
 const jiraConfig ={
     jiraUser: core.getInput("jira-user"),
     jiraPassword: core.getInput("jira-password"),
@@ -14889,13 +14889,13 @@ if (!sRepo) { core.error("no repository specified, aborting"); }
 if (!sOwner) { core.error("no owner specified, aborting"); }
 if (!sVersion) { core.error("no version specified, aborting"); }
 if (!sAuthToken) { core.error("no GitHub access token specified, aborting"); }
-if (!environment) { core.error("no environment specified, aborting"); }
+if (!tag) { core.error("no tag specified, aborting"); }
 if (!jiraConfig.jiraUser) { core.error("no jira user specified, aborting"); }
 if (!jiraConfig.jiraPassword) { core.error("no jira password specified, aborting"); }
 if (!jiraConfig.jiraUrl) { core.error("no jira url specified, aborting"); }
 
 const run = async function () {
-    new LabelJiraIssues(sAuthToken, sOwner, sRepo, sVersion, environment, jiraConfig).labelJiraIssues();
+    new LabelJiraIssues(sAuthToken, sOwner, sRepo, sVersion, tag, jiraConfig).labelJiraIssues();
 }
 
 try {

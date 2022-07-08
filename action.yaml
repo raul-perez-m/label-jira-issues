@@ -9,8 +9,8 @@ inputs:
     description: 'The GitHub access token required to delete the assets & discover non released versions'
     required: true
     default: ''
-  environment:
-    description: 'The environment to use for the action'
+  tag:
+    description: 'The tag to assign to the issues'
     required: false
     default: 'PRE-PROD'
   jira-url:
