@@ -8,6 +8,7 @@ const sVersion = core.getInput("version")
 const sAuthToken = core.getInput("github-access-token");
 const environment = core.getInput("environment");
 
+console.log(`version: ${sVersion}`);
 if (!sRepo) { core.error("no repository specified, aborting"); }
 if (!sOwner) { core.error("no owner specified, aborting"); }
 if (!sVersion) { core.error("no version specified, aborting"); }
