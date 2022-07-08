@@ -14408,6 +14408,7 @@ var __webpack_exports__ = {};
 // This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
 (() => {
 const core = __nccwpck_require__(9901);
+const github = requiere('@actions/github');
 const {LabelJiraIssues} = __nccwpck_require__(1765);
 
 const sRepo = github.context.repo.repo;
