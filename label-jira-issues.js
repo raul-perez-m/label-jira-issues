@@ -32,8 +32,9 @@ module.exports.LabelJiraIssues = class LabelJiraIssues {
     }
     async updateIssues(release) {
         const description = release.body;
-        const issues = description.match(/FCA[-|\s]\d*/gi);
-        console.log(`Found ${issues.length} issues`);
+        const regex = new RegExp(`${this.jiraConfig.projectPrefix}[-|\\s]\\d*`, 'gi');
+        const issues = description.match(regex);
+        console.log(`Found ${issues?.length} issues`);
 
         for (const issue of issues) {
             const issueNumber = issue.replace(/([ ])/g, '-');

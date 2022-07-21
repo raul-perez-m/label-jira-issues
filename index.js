@@ -10,7 +10,9 @@ const tag = core.getInput("tag");
 const jiraConfig ={
     jiraUser: core.getInput("jira-user"),
     jiraPassword: core.getInput("jira-password"),
-    jiraUrl: core.getInput("jira-url")
+    jiraUrl: core.getInput("jira-url"),
+    projectPrefix: core.getInput("project-prefix")
+
 }; 
 
 console.log(`version: ${sVersion}`);
@@ -22,6 +24,7 @@ if (!tag) { core.error("no tag specified, aborting"); }
 if (!jiraConfig.jiraUser) { core.error("no jira user specified, aborting"); }
 if (!jiraConfig.jiraPassword) { core.error("no jira password specified, aborting"); }
 if (!jiraConfig.jiraUrl) { core.error("no jira url specified, aborting"); }
+if (!jiraConfig.projectPrefix) { core.error("no project prefix specified, aborting"); }
 
 const run = async function () {
     new LabelJiraIssues(sAuthToken, sOwner, sRepo, sVersion, tag, jiraConfig).labelJiraIssues();

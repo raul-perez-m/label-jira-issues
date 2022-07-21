@@ -25,6 +25,10 @@ inputs:
     description: 'The Jira basic auth password'
     required: true
     default: ''
+  project-prefix:
+    description: 'The Jira project prefix'
+    required: true
+    default: ''
 runs:
   using: 'node16'
   main: 'dist/index.js'
