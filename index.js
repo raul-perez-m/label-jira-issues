@@ -7,13 +7,12 @@ const sOwner = github.context.repo.owner
 const sVersion = core.getInput("version")
 const sAuthToken = core.getInput("github-access-token");
 const tag = core.getInput("tag");
-const jiraConfig ={
+const jiraConfig = {
     jiraUser: core.getInput("jira-user"),
     jiraPassword: core.getInput("jira-password"),
     jiraUrl: core.getInput("jira-url"),
-    projectPrefix: core.getInput("project-prefix")
-
-}; 
+    projectPrefix: core.getInput("project-prefix"),
+};
 
 console.log(`version: ${sVersion}`);
 if (!sRepo) { core.error("no repository specified, aborting"); }

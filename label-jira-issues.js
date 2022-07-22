@@ -38,6 +38,9 @@ module.exports.LabelJiraIssues = class LabelJiraIssues {
 
         for (const issue of issues) {
             const issueNumber = issue.replace(/([ ])/g, '-');
+            const { data } = await this.getIssue(issueNumber).data.fields.labels;
+            const labels = data.fields.labels;
+            labels.push(this.tag);
             const request = {
                 method: 'PUT',
                 url: `${this.jiraConfig.jiraUrl}/rest/api/latest/issue/${issueNumber}`,
@@ -45,15 +48,27 @@ module.exports.LabelJiraIssues = class LabelJiraIssues {
                     username: this.jiraConfig.jiraUser,
                     password: this.jiraConfig.jiraPassword,
                 },
-                data: { fields: { labels: [this.tag] } }
+                data: { fields: { labels: labels } }
             };
             try {
-                await axios(request);
+                await axios(request);await axios(request);
                 console.log(`${issueNumber} updated with TAG: ${this.tag}`);
             } catch (error) {
                 console.log(error);
                 core.error(`${issueNumber} not updated with TAG: ${this.tag}`);
             }
         }
+    }
+
+    async getIssue(issueNumber) {
+        const request = {
+            method: 'GET',
+            url: `${this.jiraConfig.jiraUrl}/rest/api/latest/issue/${issueNumber}?fields=labels`,
+            auth: {
+                username: this.jiraConfig.jiraUser,
+                password: this.jiraConfig.jiraPassword,
+            },
+        };
+        return await axios(request);
     }
 }
