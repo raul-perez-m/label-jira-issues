@@ -38,11 +38,15 @@ module.exports.LabelJiraIssues = class LabelJiraIssues {
     }
     async updateIssues(release) {
         const description = release.body;
-        const issues = description.match(/FCA[-|\s]\d*/gi);
-        console.log(`Found ${issues.length} issues`);
+        const regex = new RegExp(`${this.jiraConfig.projectPrefix}[-|\\s]\\d*`, 'gi');
+        const issues = description.match(regex);
+        console.log(`Found ${issues?.length} issues`);
 
         for (const issue of issues) {
             const issueNumber = issue.replace(/([ ])/g, '-');
+            const { data } = await this.getIssue(issueNumber);
+            const labels = data.fields.labels;
+            labels.push(this.tag);
             const request = {
                 method: 'PUT',
                 url: `${this.jiraConfig.jiraUrl}/rest/api/latest/issue/${issueNumber}`,
@@ -50,7 +54,7 @@ module.exports.LabelJiraIssues = class LabelJiraIssues {
                     username: this.jiraConfig.jiraUser,
                     password: this.jiraConfig.jiraPassword,
                 },
-                data: { fields: { labels: [this.tag] } }
+                data: { fields: { labels: labels } }
             };
             try {
                 await axios(request);
@@ -60,6 +64,18 @@ module.exports.LabelJiraIssues = class LabelJiraIssues {
                 core.error(`${issueNumber} not updated with TAG: ${this.tag}`);
             }
         }
+    }
+
+    async getIssue(issueNumber) {
+        const request = {
+            method: 'GET',
+            url: `${this.jiraConfig.jiraUrl}/rest/api/latest/issue/${issueNumber}?fields=labels`,
+            auth: {
+                username: this.jiraConfig.jiraUser,
+                password: this.jiraConfig.jiraPassword,
+            },
+        };
+        return axios(request);
     }
 }
 
@@ -14880,12 +14896,12 @@ const sOwner = github.context.repo.owner
 const sVersion = core.getInput("version")
 const sAuthToken = core.getInput("github-access-token");
 const tag = core.getInput("tag");
-const jiraConfig ={
+const jiraConfig = {
     jiraUser: core.getInput("jira-user"),
     jiraPassword: core.getInput("jira-password"),
-    jiraUrl: core.getInput("jira-url")
-}; 
-
+    jiraUrl: core.getInput("jira-url"),
+    projectPrefix: core.getInput("project-prefix"),
+};
 console.log(`version: ${sVersion}`);
 if (!sRepo) { core.error("no repository specified, aborting"); }
 if (!sOwner) { core.error("no owner specified, aborting"); }
@@ -14895,6 +14911,7 @@ if (!tag) { core.error("no tag specified, aborting"); }
 if (!jiraConfig.jiraUser) { core.error("no jira user specified, aborting"); }
 if (!jiraConfig.jiraPassword) { core.error("no jira password specified, aborting"); }
 if (!jiraConfig.jiraUrl) { core.error("no jira url specified, aborting"); }
+if (!jiraConfig.projectPrefix) { core.error("no project prefix specified, aborting"); }
 
 const run = async function () {
     new LabelJiraIssues(sAuthToken, sOwner, sRepo, sVersion, tag, jiraConfig).labelJiraIssues();

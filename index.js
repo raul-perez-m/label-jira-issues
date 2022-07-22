@@ -13,7 +13,6 @@ const jiraConfig = {
     jiraUrl: core.getInput("jira-url"),
     projectPrefix: core.getInput("project-prefix"),
 };
-
 console.log(`version: ${sVersion}`);
 if (!sRepo) { core.error("no repository specified, aborting"); }
 if (!sOwner) { core.error("no owner specified, aborting"); }

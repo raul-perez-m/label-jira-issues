@@ -38,7 +38,7 @@ module.exports.LabelJiraIssues = class LabelJiraIssues {
 
         for (const issue of issues) {
             const issueNumber = issue.replace(/([ ])/g, '-');
-            const { data } = await this.getIssue(issueNumber).data.fields.labels;
+            const { data } = await this.getIssue(issueNumber);
             const labels = data.fields.labels;
             labels.push(this.tag);
             const request = {
@@ -51,7 +51,7 @@ module.exports.LabelJiraIssues = class LabelJiraIssues {
                 data: { fields: { labels: labels } }
             };
             try {
-                await axios(request);await axios(request);
+                await axios(request);
                 console.log(`${issueNumber} updated with TAG: ${this.tag}`);
             } catch (error) {
                 console.log(error);
@@ -69,6 +69,6 @@ module.exports.LabelJiraIssues = class LabelJiraIssues {
                 password: this.jiraConfig.jiraPassword,
             },
         };
-        return await axios(request);
+        return axios(request);
     }
 }
