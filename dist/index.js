@@ -40,8 +40,8 @@ module.exports.LabelJiraIssues = class LabelJiraIssues {
         const description = release.body;
         const regex = new RegExp(`${this.jiraConfig.projectPrefix}[-|\\s]\\d*`, 'gi');
         const issues = description.match(regex);
-        console.log(`Found ${issues?.length} issues`);
-
+        if (!issues) { core.info('No issues detected'); return; }
+        core.info(`Found ${issues?.length} issues`);
         for (const issue of issues) {
             const issueNumber = issue.replace(/([ ])/g, '-');
             const { data } = await this.getIssue(issueNumber);
@@ -58,7 +58,7 @@ module.exports.LabelJiraIssues = class LabelJiraIssues {
             };
             try {
                 await axios(request);
-                console.log(`${issueNumber} updated with TAG: ${this.tag}`);
+                core.info(`${issueNumber} updated with TAG: ${this.tag}`);
             } catch (error) {
                 console.log(error);
                 core.error(`${issueNumber} not updated with TAG: ${this.tag}`);
